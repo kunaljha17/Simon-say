@@ -4,6 +4,9 @@ A fun memory challenge game built using **HTML, CSS, and JavaScript**.
 
 ---
 
+##  Author
+**Kunal Kumar**
+
 ##  How to Play?
 1. Press **any key** to start the game.
 2. The game will **blink a random box** for a short time.
@@ -27,12 +30,13 @@ A fun memory challenge game built using **HTML, CSS, and JavaScript**.
 * CSS
 * JavaScript
 
+
 ---
 
 ##  How to Run Locally?
 ```bash
 # Clone this repository
-git clone https://github.com/YOUR_USERNAME/simon-say.git
+git clone https://github.com/kunaljha17/Simon-say.git
 
 # Go inside the folder
 cd simon-say
