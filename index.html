@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simon Says Game</title>
+     <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-header">
+        <h1>Simon Says Game</h1>
+        
+        <div class="stats-bar">
+            <div class="stat-box">
+                <div class="stat-label">Level</div>
+                <div class="stat-value" id="levelDisplay">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">High Score</div>
+                <div class="stat-value" id="highScoreDisplay">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Streak</div>
+                <div class="stat-value" id="streakDisplay">0</div>
+            </div>
+        </div>
+
+        <div class="difficulty-selector">
+            <button class="difficulty-btn active" data-difficulty="normal" onclick="changeDifficulty('normal')">Normal</button>
+            <button class="difficulty-btn" data-difficulty="hard" onclick="changeDifficulty('hard')">Hard</button>
+            <button class="difficulty-btn" data-difficulty="extreme" onclick="changeDifficulty('extreme')">Extreme</button>
+        </div>
+
+        <div class="game-status" id="statusText">Press START or Space to Begin</div>
+    </div>
+
+    <div class="game-container">
+        <div class="btn red" id="red"></div>
+        <div class="btn yellow" id="yellow"></div>
+        <div class="btn grey" id="grey"></div>
+        <div class="btn blue" id="blue"></div>
+        <div class="center-circle" onclick="startGame()">START</div>
+    </div>
+
+    <div class="controls">
+        <button class="control-btn" onclick="startGame()">Start Game</button>
+        <button class="control-btn" onclick="showSequence()">Replay Sequence</button>
+        <button class="control-btn" onclick="resetHighScore()">Reset Score</button>
+    </div>
+
+    <footer>
+        <p>© 2025 Simon Says Game | Developed by <span>Kunal Kumar</span></p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>

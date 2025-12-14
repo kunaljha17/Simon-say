@@ -1,124 +1,162 @@
-let name = localStorage.getItem("highScoreName") || "No Name";
-
-let gameSeq = [];
-let userSeq = [];
-
-let btns = ["grey", "red", "yellow", "blue"];
-
-let started = false;
-let level = 0;
-
  
-let highScore = localStorage.getItem("highScore") || 0;
 
-let sounds = {
-    grey: new Audio("https://s3.amazonaws.com/freecodecamp/simonSound1.mp3"),
-    red: new Audio("https://s3.amazonaws.com/freecodecamp/simonSound2.mp3"),
-    yellow: new Audio("https://s3.amazonaws.com/freecodecamp/simonSound3.mp3"),
-    blue: new Audio("https://s3.amazonaws.com/freecodecamp/simonSound4.mp3"),
-    wrong: new Audio("https://www.soundjay.com/button/beep-10.mp3")
-};
+ let gameSeq = [];
+        let userSeq = [];
+        const btns = ["grey", "red", "yellow", "blue"];
+        let started = false;
+        let level = 0;
+        let highScore = 0;
+        let streak = 0;
+        let difficulty = "normal";
+        let isPlayingSequence = false;
 
-let h2 = document.querySelector('h2');
-let h3 = document.querySelector('h3');
-h3.innerHTML = `${name} High score : <b>${highScore}</b>`;
+        const speeds = {
+            normal: 600,
+            hard: 400,
+            extreme: 250
+        };
 
-document.addEventListener("keypress", function () {
-    if (!started) {
-        started = true;
-        levelup();
-    }
-});
+        const sounds = {
+            grey: new Audio("https://s3.amazonaws.com/freecodecamp/simonSound1.mp3"),
+            red: new Audio("https://s3.amazonaws.com/freecodecamp/simonSound2.mp3"),
+            yellow: new Audio("https://s3.amazonaws.com/freecodecamp/simonSound3.mp3"),
+            blue: new Audio("https://s3.amazonaws.com/freecodecamp/simonSound4.mp3"),
+            wrong: new Audio("https://www.soundjay.com/button/beep-10.mp3")
+        };
 
-function gameflash(btn) {
-    btn.classList.add("flash");
-    setTimeout(() => btn.classList.remove("flash"), 250);
-}
+        document.addEventListener("keypress", function(e) {
+            if (e.code === "Space" && !started) {
+                startGame();
+            }
+        });
 
-function userflash(btn) {
-    btn.classList.add("userflash");
-    setTimeout(() => btn.classList.remove("userflash"), 250);
-}
-
-function levelup() {
-    userSeq = [];
-    level++;
-    h2.innerHTML = `Level ${level}`;
-
-    let randidx = Math.floor(Math.random() * 4);
-    let randColor = btns[randidx];
-    let randBtn = document.querySelector(`.${randColor}`);
-
-    gameSeq.push(randColor);
-    console.log("Game Sequence:", gameSeq);
-
-    gameflash(randBtn);
-    sounds[randColor].play();
-}
-
-function checkAns(idx) {
-    if (userSeq[idx] === gameSeq[idx]) {
-        if (userSeq.length === gameSeq.length) {
-            setTimeout(levelup, 1000);
-        }
-    } else {
-        sounds["wrong"].play();
-
-        if (level > highScore) {
-            highScore = level;
-            localStorage.setItem("highScore", highScore);
-
-            name = prompt("🎉 New High Score! Enter your name:");
-            if (!name) name = "Anonymous";
-            localStorage.setItem("highScoreName", name);
+        function changeDifficulty(newDifficulty) {
+            if (started) return;
+            difficulty = newDifficulty;
+            document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-difficulty="${newDifficulty}"]`).classList.add('active');
         }
 
-        h2.innerHTML = `Game Over! Your score was <b>${level}</b> <br>Press any key to start`;
-        h3.innerHTML = `${name} High score : <b>${highScore}</b>`;
+        function updateDisplay() {
+            document.getElementById('levelDisplay').textContent = level;
+            document.getElementById('highScoreDisplay').textContent = highScore;
+            document.getElementById('streakDisplay').textContent = streak;
+        }
 
-        document.body.style.backgroundColor = "red";
-        setTimeout(() => {
-            document.body.style.backgroundColor = "white";
-        }, 150);
+        function startGame() {
+            if (started) return;
+            started = true;
+            streak = 0;
+            document.querySelector('.center-circle').textContent = level;
+            levelUp();
+        }
 
-        reset();
-    }
-}
+        async function gameFlash(btn) {
+            btn.classList.add("flash");
+            sounds[btn.id].play();
+            await new Promise(resolve => setTimeout(resolve, 300));
+            btn.classList.remove("flash");
+        }
 
-function btnpress() {
-    let btn = this;
-    userflash(btn);
+        function userFlash(btn) {
+            btn.classList.add("userflash");
+            sounds[btn.id].play();
+            setTimeout(() => btn.classList.remove("userflash"), 250);
+        }
 
-    let userColor = btn.getAttribute("id");
-    userSeq.push(userColor);
+        async function showSequence() {
+            if (!started || isPlayingSequence || gameSeq.length === 0) return;
+            isPlayingSequence = true;
+            document.getElementById('statusText').textContent = "Replaying Sequence...";
+            
+            for (let color of gameSeq) {
+                await new Promise(resolve => setTimeout(resolve, 200));
+                let btn = document.getElementById(color);
+                await gameFlash(btn);
+            }
+            
+            document.getElementById('statusText').textContent = "Your Turn!";
+            isPlayingSequence = false;
+        }
 
-    sounds[userColor].play();
+        async function levelUp() {
+            userSeq = [];
+            level++;
+            streak++;
+            updateDisplay();
+            document.getElementById('statusText').textContent = `Level ${level} - Watch Carefully!`;
+            document.querySelector('.center-circle').textContent = level;
 
-    checkAns(userSeq.length - 1);
-}
+            let randColor = btns[Math.floor(Math.random() * 4)];
+            gameSeq.push(randColor);
 
-let allBtns = document.querySelectorAll('.btn');
-for (let btn of allBtns) {
-    btn.addEventListener("click", btnpress);
-}
+            isPlayingSequence = true;
+            await new Promise(resolve => setTimeout(resolve, 800));
 
-function reset() {
-    started = false;
-    gameSeq = [];
-    userSeq = [];
-    level = 0;
-}
+            for (let color of gameSeq) {
+                let btn = document.getElementById(color);
+                await gameFlash(btn);
+                await new Promise(resolve => setTimeout(resolve, speeds[difficulty] - 300));
+            }
 
- 
-window.resetHighScore = function (secret) {
-    if (secret === "kunal@123") {
-        localStorage.removeItem("highScore");
-        localStorage.removeItem("highScoreName");
-        highScore = 0;
-        name = "No Name";
-        alert("High Score has been reset via console!");
-        h3.innerHTML = `${name} High score : <b>${highScore}</b>`;
-    } else {
-        alert("Invalid password. High Score not reset.");
-    }
-};
+            document.getElementById('statusText').textContent = "Your Turn!";
+            isPlayingSequence = false;
+        }
+
+        function checkAns(idx) {
+            if (userSeq[idx] === gameSeq[idx]) {
+                if (userSeq.length === gameSeq.length) {
+                    setTimeout(levelUp, 1000);
+                }
+            } else {
+                sounds.wrong.play();
+                document.body.style.background = "#ffcdd2";
+                setTimeout(() => {
+                    document.body.style.background = "#ffffff";
+                }, 200);
+
+                if (level > highScore) {
+                    highScore = level;
+                    document.getElementById('statusText').textContent = `New High Score: ${level}! Press START to play again`;
+                } else {
+                    document.getElementById('statusText').textContent = `Game Over! Score: ${level} | Press START to try again`;
+                }
+
+                reset();
+            }
+        }
+
+        function btnPress() {
+            if (!started || isPlayingSequence) return;
+            
+            let btn = this;
+            userFlash(btn);
+            userSeq.push(btn.id);
+            checkAns(userSeq.length - 1);
+        }
+
+        document.querySelectorAll('.btn').forEach(btn => {
+            btn.addEventListener("click", btnPress);
+        });
+
+        function reset() {
+            started = false;
+            gameSeq = [];
+            userSeq = [];
+            level = 0;
+            streak = 0;
+            document.querySelector('.center-circle').textContent = "START";
+            updateDisplay();
+        }
+
+        function resetHighScore() {
+            if (confirm("Are you sure you want to reset the high score?")) {
+                highScore = 0;
+                updateDisplay();
+                alert("High Score has been reset!");
+            }
+        }
+
+        updateDisplay();
